@@ -1,0 +1,69 @@
+---
+title: "black_box and neuralnetwork"
+author: "SIDDARTH POOSALA"
+date: "17/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+concrete <- read.csv("e:/concrete.csv")
+concrete
+str(concrete)
+dim(concrete)
+summary(concrete)
+is.data.frame(concrete)
+```
+```{r}
+#normlazie 0 to 1
+normalize <- function(x) {
+  return((x-min(x)) / (max(x) - min(x)))
+}
+
+```
+```{r}
+concrete_norm <- as.data.frame(lapply(concrete, normalize))
+summary(concrete_norm$strength)
+summary(concrete)
+summary(concrete_norm)
+
+```
+```{r}
+concrete_train <- concrete_norm[1:773, ]
+concrete_test <- concrete_norm[774:1030, ]
+```
+```{r}
+install.packages("neuralnet")
+library(neuralnet)
+```
+
+```{r}
+
+concrete_model <- neuralnet(strength ~ cement + slag + ash + water + superplastic + coarseagg + fineagg + age,data = concrete_train)
+plot(concrete_model)
+```
+```{r}
+# evaluating model performance
+model_results <- compute(concrete_model , concrete_test[1:8])
+#compute returns a list with two components:
+# $ neurons , which stores the neurons for each layer in the net work 
+# $ net.result, which stores the predicted values.
+
+```
+```{r}
+predicted_strength <- model_results$net.result
+cor(predicted_strength, concrete_test$strength)
+```
+```{r}
+concrete_model2 <-  neuralnet(strength ~ cement + slag + ash + water + superplastic + coarseagg + fineagg + age,data = concrete_train, hidden = 5)
+
+plot(concrete_model2)
+```
+```{r}
+model_results2 <- compute(concrete_model2, concrete_test[1:8])
+predicted_strength2 <- model_results2$net.result 
+cor(predicted_strength2, concrete_test$strength)
+```
+
